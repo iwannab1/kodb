@@ -14,17 +14,16 @@ doc = htmlTreeParse(page, useInternalNodes = T)
 
 contents <- xpathSApply(doc, "//*[@class='sResult']//dl")
 
-body_content <-NULL
-getContent <- function(subdoc){
-  url <- xpathSApply(subdoc, "dt/a/@href")
-  cat("url : ",url); cat("\n")
-  date <- xpathSApply(subdoc,"dt/span/text()")
-  #cat("date : ",date); cat("\n")
-  #iconv(sent, localeToCharset()[1], "UTF-8")
-  title <- xpathSApply(subdoc,"dd/text()")
-  #cat("title : ",title); cat("\n")
-  body_content <- cbind(url, date, title)
-  write.csv(body_content, savefile, append=TRUE)
+body_content <- NULL
+body_table <- NULL
+
+for (i in 1:length(contents)){
+  url <- xpathSApply(contents[[i]], "dt/a/@href")
+  date <- xpathSApply(contents[[i]],"dt/span/text()")
+  title <- xpathSApply(contents[[i]],"dd/text()")
+  body_content <- cbind(url[[1]], xmlValue(date[[1]]), xmlValue(title[[1]]))
+  body_table <- rbind(body_table, body_content)
 }
 
-lapply(contents, getContent)
+write.csv(body_table, savefile, fileEncoding = "UTF-8")
+
